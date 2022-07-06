@@ -1,26 +1,26 @@
 package dellcmi;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.HttpClients;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.netty.http.client.HttpClient;
 
 @SpringBootApplication
 public class Main {
 
-    private String baseUrl = "http://owc-lqd.dsc.ufcg.edu.br:8081";
+    private BasicCookieStore cookieStore;
 
     public static void main(String[] args) {
         SpringApplication.run(Main.class);
     }
 
     @Bean
-    public WebClient webClient(WebClient.Builder builder) {
-        return builder
-                .baseUrl(baseUrl)
-//                .clientConnector(new ReactorClientHttpConnector(HttpClient.create().followRedirect(true)))
+    public HttpClient httpClient() {
+        this.cookieStore = new BasicCookieStore();
+        return HttpClients.custom()
+                .setDefaultCookieStore(cookieStore)
                 .build();
     }
 

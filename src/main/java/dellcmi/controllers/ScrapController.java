@@ -25,7 +25,6 @@ public class ScrapController {
     @ResponseBody
     public ResponseEntity<?> getResponse(@RequestParam String username, @RequestParam String password){
         try {
-
             return new ResponseEntity<String>(service.initConnection(username, password), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<String>(e.toString(), HttpStatus.BAD_REQUEST);

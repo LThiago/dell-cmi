@@ -1,46 +1,53 @@
 package dellcmi.services;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class ScrapService {
 
     @Autowired
-    private WebClient client;
+    private HttpClient httpClient;
 
-    public String initConnection(String username, String password) {
+    private String baseUrl = "http://owc-lqd.dsc.ufcg.edu.br:8081";
+
+    public String initConnection(String username, String password) throws IOException {
         Map<String, String> credentials = new HashMap<>();
         credentials.put("j_username", username);
         credentials.put("j_password", password);
 
-        String response = doLogin(credentials);
-
-        return response;
+        HttpPost loginRequest = createLoginRequest(credentials);
+        HttpResponse response = this.httpClient.execute(loginRequest);
+        
+        String responseString = new BasicResponseHandler().handleResponse(response);
+        return responseString;
     }
 
-    private String doLogin(Map<String, String> credentials){
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+    private HttpPost createLoginRequest(Map<String, String> credentials){
+        String uri = baseUrl + "/cs/login/j_security_check";
+
+        HttpPost request = new HttpPost(uri);
+        request.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        List <NameValuePair> formData = new ArrayList <>();
         for(Map.Entry<String, String> field : credentials.entrySet()){
-            formData.add(field.getKey(), field.getValue());
+            formData.add(new BasicNameValuePair(field.getKey(), field.getValue()));
         }
 
-        String response = this.client
-                .post()
-                .uri("/cs/login/j_security_check")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(BodyInserters.fromFormData(formData))
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();;
-        return response;
+        request.setEntity(new UrlEncodedFormEntity(formData, StandardCharsets.UTF_8));
+
+        return request;
     }
 
 }
