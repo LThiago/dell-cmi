@@ -29,7 +29,7 @@ public class ScrapService {
 
         HttpPost loginRequest = createLoginRequest(credentials);
         HttpResponse response = this.httpClient.execute(loginRequest);
-        
+
         String responseString = new BasicResponseHandler().handleResponse(response);
         return responseString;
     }

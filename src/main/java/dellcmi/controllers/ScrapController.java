@@ -16,7 +16,7 @@ public class ScrapController {
     @Autowired
     private ScrapService service  = new ScrapService();
 
-    @GetMapping("/health")
+    @GetMapping("/status")
     public ResponseEntity<String> getHealth() {
         return new ResponseEntity<String>("Service is running on door :8080. With safe Connection.", HttpStatus.OK);
     }
