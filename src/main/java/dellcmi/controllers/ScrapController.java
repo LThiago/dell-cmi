@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
 public class ScrapController {
 
@@ -26,6 +25,15 @@ public class ScrapController {
     public ResponseEntity<?> getResponse(@RequestParam String username, @RequestParam String password){
         try {
             return new ResponseEntity<String>(service.initConnection(username, password), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/userInfo")
+    public ResponseEntity<?> getResponse(){
+        try {
+            return new ResponseEntity<String>(service.getUserInfo(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<String>(e.toString(), HttpStatus.BAD_REQUEST);
         }
