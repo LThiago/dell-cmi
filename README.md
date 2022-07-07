@@ -2,6 +2,8 @@
 
 ## API
 
+> All the functionalities described below are available on `http://localhost:8080/swagger-ui.html`.
+
 ### Get server status
 
 Returns server status.
