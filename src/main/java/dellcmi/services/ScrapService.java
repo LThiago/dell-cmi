@@ -24,6 +24,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.json.JSONObject;
+import org.json.XML;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -74,7 +76,9 @@ public class ScrapService {
         InputStream is = response.getEntity().getContent();
         String content = new BufferedReader(new InputStreamReader(is)).lines().collect(Collectors.joining("\n"));;
 
-        return content;
+        JSONObject obj = XML.toJSONObject(content);
+
+        return obj.toString(4);
     }
 
     private HttpGet createGetRequest(String uri){

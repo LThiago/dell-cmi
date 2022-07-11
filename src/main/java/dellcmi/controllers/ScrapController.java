@@ -1,6 +1,8 @@
 package dellcmi.controllers;
 
 import dellcmi.services.ScrapService;
+
+import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,7 +36,7 @@ public class ScrapController {
     @GetMapping("/userInfo")
     public ResponseEntity<?> getResponse(){
         try {
-            return ResponseEntity.ok().contentType(MediaType.TEXT_XML)
+            return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN)
             .body(service.getUserInfo());
             // return new ResponseEntity<String>(service.getUserInfo(), HttpStatus.OK);
         } catch (Exception e) {
