@@ -1,9 +1,13 @@
 package dellcmi.services;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -39,8 +43,21 @@ public class ScrapService {
         HttpPost loginRequest = createPostRequest(uri, credentials);
         HttpResponse response = this.httpClient.execute(loginRequest, this.clientContext);
 
-        String responseString = new BasicResponseHandler().handleResponse(response);
-        return responseString;
+        String uri2 = "/cs/idcplg?IdcService=GET_USER_INFO&IsSoap=1";
+        HttpGet request2 = createGetRequest(uri2);
+
+        HttpResponse response2 = this.httpClient.execute(request2, this.clientContext);
+        HttpEntity entity = response2.getEntity();
+        InputStream is = entity.getContent();
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(isr);
+        StringBuilder message = new StringBuilder();
+        String line = "";
+        while((line = br.readLine()) != null){
+            message.append(line);
+        }
+        String responseString = new BasicResponseHandler().handleResponse(response2);
+        return message.toString();
     }
 
     public HttpClient buildHttpClient() {
@@ -59,6 +76,7 @@ public class ScrapService {
 
         HttpResponse response = this.httpClient.execute(request, this.clientContext);
 
+        
         String responseString = new BasicResponseHandler().handleResponse(response);
         return responseString;
     }
