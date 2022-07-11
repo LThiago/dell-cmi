@@ -36,9 +36,8 @@ public class ScrapController {
     @GetMapping("/userInfo")
     public ResponseEntity<?> getResponse(){
         try {
-            return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN)
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
             .body(service.getUserInfo());
-            // return new ResponseEntity<String>(service.getUserInfo(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<String>(e.toString(), HttpStatus.BAD_REQUEST);
         }

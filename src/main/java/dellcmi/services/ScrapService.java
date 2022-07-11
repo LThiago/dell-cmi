@@ -69,13 +69,10 @@ public class ScrapService {
     public String getUserInfo() throws IOException {
         String uri = "/cs/idcplg?IdcService=GET_USER_INFO&IsSoap=1";
         HttpGet request = createGetRequest(uri);
-        request.addHeader("Content-Type","text");
 
         HttpResponse response = this.httpClient.execute(request, this.clientContext);
 
-        InputStream is = response.getEntity().getContent();
-        String content = new BufferedReader(new InputStreamReader(is)).lines().collect(Collectors.joining("\n"));;
-
+        String content = new BasicResponseHandler().handleResponse(response);
         JSONObject obj = XML.toJSONObject(content);
 
         return obj.toString(4);
