@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -21,19 +22,21 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ScrapService {
 
-    private HttpClient httpClient;
+    private HttpClient httpClient = buildHttpClient();;
 
     private HttpClientContext clientContext;
 
     private String baseUrl = "http://owc-lqd.dsc.ufcg.edu.br:8081";
 
     public String initConnection(String username, String password) throws IOException {
-        this.httpClient = buildHttpClient();
+        //this.httpClient = buildHttpClient();
 
         Map<String, String> credentials = new HashMap<>();
         credentials.put("j_username", username);
@@ -43,21 +46,12 @@ public class ScrapService {
         HttpPost loginRequest = createPostRequest(uri, credentials);
         HttpResponse response = this.httpClient.execute(loginRequest, this.clientContext);
 
-        String uri2 = "/cs/idcplg?IdcService=GET_USER_INFO&IsSoap=1";
-        HttpGet request2 = createGetRequest(uri2);
+        for (int i = 0; i < response.getAllHeaders().length; i++) {
+            System.out.println(response.getAllHeaders()[i]);
+        } 
 
-        HttpResponse response2 = this.httpClient.execute(request2, this.clientContext);
-        HttpEntity entity = response2.getEntity();
-        InputStream is = entity.getContent();
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader br = new BufferedReader(isr);
-        StringBuilder message = new StringBuilder();
-        String line = "";
-        while((line = br.readLine()) != null){
-            message.append(line);
-        }
-        String responseString = new BasicResponseHandler().handleResponse(response2);
-        return message.toString();
+        String content = new BasicResponseHandler().handleResponse(response);
+        return content;
     }
 
     public HttpClient buildHttpClient() {
@@ -73,12 +67,14 @@ public class ScrapService {
     public String getUserInfo() throws IOException {
         String uri = "/cs/idcplg?IdcService=GET_USER_INFO&IsSoap=1";
         HttpGet request = createGetRequest(uri);
+        request.addHeader("Content-Type","text");
 
         HttpResponse response = this.httpClient.execute(request, this.clientContext);
 
-        
-        String responseString = new BasicResponseHandler().handleResponse(response);
-        return responseString;
+        InputStream is = response.getEntity().getContent();
+        String content = new BufferedReader(new InputStreamReader(is)).lines().collect(Collectors.joining("\n"));;
+
+        return content;
     }
 
     private HttpGet createGetRequest(String uri){
