@@ -32,6 +32,26 @@ public class ScrapController {
         }
     }
 
+    @GetMapping("/initPage")
+    @ResponseBody
+    public ResponseEntity<?> getInitPage(){
+        try {
+            return new ResponseEntity<>(service.getInitialPage(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/login")
+    @ResponseBody
+    public ResponseEntity<?> getLoginPage(){
+        try {
+            return new ResponseEntity<>(service.getLoginPage(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/userInfo")
     public ResponseEntity<?> getResponse(){
         try {
@@ -43,10 +63,10 @@ public class ScrapController {
     }
 
     @GetMapping("/sslTrust")
-    public ResponseEntity<?> trustSSL(){
+    public ResponseEntity<?> trustSSL(@RequestParam String username, @RequestParam String password){
         try {
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
-                    .body(service.getPageWithTrustSSL());
+                    .body(service.getPageWithTrustSSL(username,password));
         } catch (Exception e) {
             return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
         }

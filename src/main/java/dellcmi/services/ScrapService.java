@@ -9,6 +9,7 @@ import java.util.*;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -34,7 +35,7 @@ public class ScrapService {
 
     private HttpClientContext clientContext;
 
-    private String baseUrl = "http://owc-lqd.dsc.ufcg.edu.br:8081";
+    private String baseUrl = "https://ceowc-uat.dell.com";
 
     public String initConnection(String username, String password) throws IOException {
         //this.httpClient = buildHttpClient();
@@ -87,6 +88,32 @@ public class ScrapService {
         return obj.toString(4);
     }
 
+    public String getInitialPage() throws IOException {
+        String uri = "/cs";
+        HttpGet request = createGetRequest(baseUrl + uri);
+
+        HttpResponse response = this.httpClient.execute(request, this.clientContext);
+
+        String content = new BasicResponseHandler().handleResponse(response);
+        
+
+        return content;
+    }
+
+    public String getLoginPage() throws IOException {
+        String uri = "/cs/idcplg?IdcService=LOGIN&Action=GetTemplatePage&Page=HOME_PAGE&Auth=Internet";
+        HttpGet request = createGetRequest(baseUrl + uri);
+
+        HttpResponse response = this.httpClient.execute(request, this.clientContext);
+
+        String content = new BasicResponseHandler().handleResponse(response);
+        
+
+        return content;
+    }
+
+    
+
     private HttpGet createGetRequest(String uri){
         HttpGet request = new HttpGet(uri);
         return request;
@@ -106,7 +133,18 @@ public class ScrapService {
         return request;
     }
 
-    public HttpGet getPageWithTrustSSL() {
-        return createGetRequest("https://mms.nw.ru/");
+    public String getPageWithTrustSSL(String username, String password) throws IOException, ClientProtocolException{
+
+        Map<String, String> credentials = new HashMap<>();
+        credentials.put("j_username", username);
+        credentials.put("j_password", password);
+
+        String uri = "/cs/login/j_security_check";
+        HttpPost loginRequest = createPostRequest(baseUrl + uri, credentials);
+        HttpResponse response = this.httpClient.execute(loginRequest, this.clientContext);
+
+        String content = new BasicResponseHandler().handleResponse(response);
+
+        return content;
     }
 }
