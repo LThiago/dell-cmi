@@ -2,7 +2,6 @@ package dellcmi.controllers;
 
 import dellcmi.services.ScrapService;
 
-import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,7 +26,7 @@ public class ScrapController {
     @ResponseBody
     public ResponseEntity<?> getResponse(@RequestParam String username, @RequestParam String password){
         try {
-            return new ResponseEntity<String>(service.initConnection(username, password), HttpStatus.OK);
+            return new ResponseEntity<>(service.initConnection(username, password), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
         }
@@ -39,7 +38,17 @@ public class ScrapController {
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
             .body(service.getUserInfo());
         } catch (Exception e) {
-            return new ResponseEntity<String>(e.toString(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/sslTrust")
+    public ResponseEntity<?> trustSSL(){
+        try {
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
+                    .body(service.getPageWithTrustSSL());
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
         }
     }
 }

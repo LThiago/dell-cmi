@@ -1,14 +1,12 @@
 package dellcmi.services;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -18,12 +16,13 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.json.JSONObject;
 import org.json.XML;
 import org.springframework.stereotype.Service;
@@ -45,7 +44,7 @@ public class ScrapService {
         credentials.put("j_password", password);
 
         String uri = "/cs/login/j_security_check";
-        HttpPost loginRequest = createPostRequest(uri, credentials);
+        HttpPost loginRequest = createPostRequest(baseUrl + uri, credentials);
         HttpResponse response = this.httpClient.execute(loginRequest, this.clientContext);
 
         for (int i = 0; i < response.getAllHeaders().length; i++) {
@@ -61,14 +60,24 @@ public class ScrapService {
         this.clientContext = HttpClientContext.create();
         this.clientContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
 
-        return HttpClients.custom()
-                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                .build();
+        try {
+            return HttpClients.custom()
+                    .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                    .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                    .build();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (KeyManagementException e) {
+            throw new RuntimeException(e);
+        } catch (KeyStoreException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getUserInfo() throws IOException {
         String uri = "/cs/idcplg?IdcService=GET_USER_INFO&IsSoap=1";
-        HttpGet request = createGetRequest(uri);
+        HttpGet request = createGetRequest(baseUrl + uri);
 
         HttpResponse response = this.httpClient.execute(request, this.clientContext);
 
@@ -79,14 +88,11 @@ public class ScrapService {
     }
 
     private HttpGet createGetRequest(String uri){
-        uri = baseUrl + uri;
         HttpGet request = new HttpGet(uri);
         return request;
     }
 
     private HttpPost createPostRequest(String uri, Map<String, String> body){
-        uri = baseUrl + uri;
-
         HttpPost request = new HttpPost(uri);
         request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -100,4 +106,7 @@ public class ScrapService {
         return request;
     }
 
+    public HttpGet getPageWithTrustSSL() {
+        return createGetRequest("https://mms.nw.ru/");
+    }
 }
