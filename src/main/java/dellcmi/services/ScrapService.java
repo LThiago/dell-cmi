@@ -1,6 +1,7 @@
 package dellcmi.services;
 
 import java.io.IOException;
+import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -106,7 +107,11 @@ public class ScrapService {
         return request;
     }
 
-    public HttpGet getPageWithTrustSSL() {
-        return createGetRequest("https://mms.nw.ru/");
+    public String getPageWithTrustSSL() throws IOException {
+        HttpGet request = createGetRequest("https://ceowc-uat.dell.com/cs");
+        HttpResponse response = this.httpClient.execute(request, this.clientContext);
+
+        String content = new BasicResponseHandler().handleResponse(response);
+        return content;
     }
 }
