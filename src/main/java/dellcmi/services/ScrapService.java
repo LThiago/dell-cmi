@@ -40,11 +40,8 @@ public class ScrapService {
     private HttpClientContext clientContext;
 
     private String baseUrl = "https://ceowc-uat.dell.com";
-    private static String PATH = System.getProperty("user.dir");
-
     public String initConnection(String username, String password) throws IOException {
         //this.httpClient = buildHttpClient();
-        String directoryPath = PATH + "/a.txt";
 
         String command = "curl -s -D - -o nul -L -X POST https://cowc-dev.dell.com/cs/login/j_security_check " +
                          "-H Content-Type: application/x-www-form-urlencoded " +
