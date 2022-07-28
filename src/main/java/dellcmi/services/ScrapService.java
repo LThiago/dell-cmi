@@ -1,10 +1,6 @@
 package dellcmi.services;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -35,37 +31,52 @@ import org.springframework.stereotype.Service;
 @Service
 public class ScrapService {
 
-    private HttpClient httpClient = buildHttpClient();;
+    private HttpClient httpClient = buildHttpClient();
 
     private HttpClientContext clientContext;
 
     private String baseUrl = "https://ceowc-uat.dell.com";
+    private static String PATH = System.getProperty("user.dir");
+
     public String initConnection(String username, String password) throws IOException {
-        //this.httpClient = buildHttpClient();
+        try {
 
-        String command = "curl -s -D - -o nul -L -X POST https://cowc-dev.dell.com/cs/login/j_security_check " +
-                         "-H Content-Type: application/x-www-form-urlencoded " +
-                         "--data-raw j_username=" + username + "&j_password=" + password;
+            ProcessBuilder pb = new ProcessBuilder("curl", "-s", "-D", "-", "-o", "nul", "-L", "-X", "POST", "https://cowc-dev.dell.com/cs/login/j_security_check", "-H", "Content-Type: application/x-www-form-urlencoded", "--data-raw", "j_username=" + username + "&j_password=" + password);
+            pb.redirectErrorStream(true);
 
-        Process process = Runtime.getRuntime().exec(command);
-        BufferedReader lineReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        lineReader.lines().forEach(System.out::println);
+            Process proc = pb.start();
 
+            InputStream ins = proc.getInputStream();
 
-        Map<String, String> credentials = new HashMap<>();
-        credentials.put("j_username", username);
-        credentials.put("j_password", password);
+            ArrayList<String> cookies = new ArrayList();
+            BufferedReader read = new BufferedReader(new InputStreamReader(ins));
+            StringBuilder sb = new StringBuilder();
+            read.lines().forEach(line -> {
+                //System.out.println("line>" + line);
+                if (line.contains("Set-Cookie")){
+                    cookies.add(line);
+                }
+                sb.append(line);
+            });
 
-        String uri = "/cs/login/j_security_check";
-        HttpPost loginRequest = createPostRequest(baseUrl + uri, credentials);
-        HttpResponse response = this.httpClient.execute(loginRequest, this.clientContext);
+            read.close();
 
-//        for (int i = 0; i < response.getAllHeaders().length; i++) {
-//            System.out.println(response.getAllHeaders()[i]);
-//        }
+            cookies.forEach(line -> {
+                System.out.println(line);
+                sb.append(line);
+            });
 
-        String content = new BasicResponseHandler().handleResponse(response);
-        return content;
+            proc.waitFor();
+
+            int exitCode = proc.exitValue();
+            System.out.println("exit code::" + exitCode);
+
+            proc.destroy();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     public HttpClient buildHttpClient() {
