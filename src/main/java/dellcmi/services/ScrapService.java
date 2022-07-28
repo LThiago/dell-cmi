@@ -1,6 +1,10 @@
 package dellcmi.services;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -36,9 +40,20 @@ public class ScrapService {
     private HttpClientContext clientContext;
 
     private String baseUrl = "https://ceowc-uat.dell.com";
+    private static String PATH = System.getProperty("user.dir");
 
     public String initConnection(String username, String password) throws IOException {
         //this.httpClient = buildHttpClient();
+        String directoryPath = PATH + "/a.txt";
+
+        String command = "curl -s -D - -o nul -L -X POST https://cowc-dev.dell.com/cs/login/j_security_check " +
+                         "-H Content-Type: application/x-www-form-urlencoded " +
+                         "--data-raw j_username=" + username + "&j_password=" + password;
+
+        Process process = Runtime.getRuntime().exec(command);
+        BufferedReader lineReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        lineReader.lines().forEach(System.out::println);
+
 
         Map<String, String> credentials = new HashMap<>();
         credentials.put("j_username", username);
@@ -48,9 +63,9 @@ public class ScrapService {
         HttpPost loginRequest = createPostRequest(baseUrl + uri, credentials);
         HttpResponse response = this.httpClient.execute(loginRequest, this.clientContext);
 
-        for (int i = 0; i < response.getAllHeaders().length; i++) {
-            System.out.println(response.getAllHeaders()[i]);
-        } 
+//        for (int i = 0; i < response.getAllHeaders().length; i++) {
+//            System.out.println(response.getAllHeaders()[i]);
+//        }
 
         String content = new BasicResponseHandler().handleResponse(response);
         return content;
