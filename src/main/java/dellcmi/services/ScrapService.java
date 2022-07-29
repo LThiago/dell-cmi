@@ -13,6 +13,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.fluent.Executor;
+import org.apache.http.client.fluent.Request;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -27,6 +29,9 @@ import org.json.JSONObject;
 import org.json.XML;
 import org.springframework.stereotype.Service;
 
+import dellcmi.util.Curl;
+import dellcmi.util.CurlWrapper;
+
 @Service
 public class ScrapService {
 
@@ -34,7 +39,17 @@ public class ScrapService {
 
     private HttpClientContext clientContext;
 
-    private String baseUrl = "http://owc-lqd.dsc.ufcg.edu.br:8081";
+    //private String baseUrl = "http://owc-lqd.dsc.ufcg.edu.br:8081";
+    private String baseUrl = "https://cowc-dev.dell.com";
+
+    
+
+    public String getLoginPageCurl() throws Exception{
+        String answer = "None";
+        CurlWrapper wrapper = new CurlWrapper();
+        answer = wrapper.executeCurlBuilder("curl -v -L -X \"GET\" https://cowc-dev.dell.com/cs/login/login.htm -H \"Content-Type: text/html\"");
+        return answer;
+    }
 
     public String initConnection(String username, String password) throws IOException {
         //this.httpClient = buildHttpClient();
@@ -44,6 +59,7 @@ public class ScrapService {
         credentials.put("j_password", password);
 
         String uri = "/cs/login/j_security_check";
+        System.out.print("%%% QUERY: " + baseUrl + uri);
         HttpPost loginRequest = createPostRequest(baseUrl + uri, credentials);
         HttpResponse response = this.httpClient.execute(loginRequest, this.clientContext);
 
@@ -100,7 +116,7 @@ public class ScrapService {
         for(Map.Entry<String, String> field : body.entrySet()){
             formData.add(new BasicNameValuePair(field.getKey(), field.getValue()));
         }
-
+        
         request.setEntity(new UrlEncodedFormEntity(formData, StandardCharsets.UTF_8));
 
         return request;

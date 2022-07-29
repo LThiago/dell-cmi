@@ -22,6 +22,16 @@ public class ScrapController {
         return new ResponseEntity<String>("Service is running on door :8080. With safe Connection.", HttpStatus.OK);
     }
 
+    @GetMapping("/mainPage")
+    @ResponseBody
+    public ResponseEntity<?> getMainPage(){
+        try {
+            return new ResponseEntity<>(service.getLoginPageCurl(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/init")
     @ResponseBody
     public ResponseEntity<?> getResponse(@RequestParam String username, @RequestParam String password){

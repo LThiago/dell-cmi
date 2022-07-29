@@ -48,6 +48,26 @@
             <version>1.6.9</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.codelibs/curl4j -->
+        <dependency>
+            <groupId>org.codelibs</groupId>
+            <artifactId>curl4j</artifactId>
+            <version>1.2.6</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/fluent-hc -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>fluent-hc</artifactId>
+            <version>4.5.13</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
+    <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpmime</artifactId>
+        <version>4.5.13</version>
+    </dependency>
     </dependencies>
 
 </project>
