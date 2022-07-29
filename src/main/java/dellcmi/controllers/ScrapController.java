@@ -24,9 +24,9 @@ public class ScrapController {
 
     @GetMapping("/mainPage")
     @ResponseBody
-    public ResponseEntity<?> getMainPage(){
+    public ResponseEntity<?> getMainPage(@RequestParam String username, @RequestParam String password){
         try {
-            return new ResponseEntity<>(service.getLoginPageCurl(), HttpStatus.OK);
+            return new ResponseEntity<>(service.getLoginPageCurl(username, password), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
         }
